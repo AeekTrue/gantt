@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "gantt"
+version = "0.1.0"
+description = ""
+authors = ["Aeek True <aeektrue@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+colorama = "^0.4.6"
+pydantic = "^2.10.6"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
