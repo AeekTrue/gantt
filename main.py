@@ -4,12 +4,6 @@ import colorama
 import pydantic
 import json
 
-def lom(date):
-    # last date of month
-    date = date.replace(day=1)
-    date = date.replace(month=date.month+1)
-    date = date - dt.timedelta(days=1)
-    return date.day
 
 digits = {
     '0':'🯰',
@@ -25,6 +19,18 @@ digits = {
 }
 
 
+class ShellException(Exception):
+    pass
+
+
+def lom(date):
+    # last date of month
+    date = date.replace(day=1)
+    date = date.replace(month=date.month+1)
+    date = date - dt.timedelta(days=1)
+    return date.day
+
+
 class Task(pydantic.BaseModel):
     start: dt.datetime
     end: dt.datetime
@@ -32,6 +38,19 @@ class Task(pydantic.BaseModel):
 
     def __str__(self):
         return f"Task({self.start}, {self.end}, {self.title})"
+
+    def process(self, args: list[str]):
+        match args:
+            case []:
+                print(self)
+            case a, b if a.isdigit() and b.isdigit():
+                a, b = int(a), int(b)
+                self.start = self.start.replace(day=a)
+                self.end = self.end.replace(day=b)
+            case _:
+                print('Unknown args')
+                # raise ShellException()
+
 
 
 def random_task(title="Random Task"):
@@ -55,14 +74,6 @@ def random_task(title="Random Task"):
 class Storage(pydantic.BaseModel):
     tasks: list[Task]
 
-with open('tasks.json', 'r') as f:
-    storage = Storage.model_validate_json(f.read())
-
-# storage.tasks = [random_task() for _ in range(11)]
-tasks = storage.tasks
-
-with open('tasks.json', 'w') as f:
-    f.write(storage.model_dump_json())
 
 def display_timeline(lshift=0):
     def make_up(x, style):
@@ -93,7 +104,44 @@ def display_tasks_on_timeline(tasks):
 
         start_day = task.start.day
         end_day = task.end.day
-        print(task.title[:task_size].ljust(task_size)+"".join(["╶╴" if i < start_day or i > end_day else "▇▇" for i in range(1, lom(dt.datetime.now())+1)]))
+        task_id_and_title = str(i).rjust(2) + ' ' + task.title
+        print(task_id_and_title[:task_size].ljust(task_size)+"".join(["╶╴" if i < start_day or i > end_day else "▇▇" for i in range(1, lom(dt.datetime.now())+1)]))
         i += 1
+    print(colorama.Fore.RESET, end="")
+
+
+with open('tasks.json', 'r') as f:
+    storage = Storage.model_validate_json(f.read())
+
+# storage.tasks = [random_task() for _ in range(11)]
+tasks = storage.tasks
 
 display_tasks_on_timeline(tasks)
+while True:
+    cmd = input('>>>').split(' ')
+    match cmd:
+        case task_id, *args if task_id.isdigit():
+            task_id = int(task_id)
+            task = tasks[task_id]
+            task.process(args)
+        case 'new', title, start, end if start.isdigit() and end.isdigit():
+            today = dt.datetime.now()
+            start = today.replace(day=int(start))
+            end = today.replace(day=int(end))
+            tasks.append(Task(start=start, end=end, title=title))
+        case 'move', task_id, new_place if task_id.isdigit() and new_place.isdigit():
+            tasks.insert(int(new_place), tasks.pop(int(task_id)))
+        case 'show', :
+            display_tasks_on_timeline(tasks)
+        case 'save',:
+            with open('tasks.json', 'w') as f:
+                f.write(storage.model_dump_json())
+            print('Saved')
+        case 'exit',:
+            break
+        case _:
+            print('Unknown command')
+            # raise ShellException('Unknown command')
+
+with open('tasks.json', 'w') as f:
+    f.write(storage.model_dump_json())
