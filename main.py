@@ -1,7 +1,8 @@
-from ast import LShift
+from typing import List
 import datetime as dt
 import colorama
-
+import pydantic
+import json
 
 def lom(date):
     # last date of month
@@ -24,40 +25,44 @@ digits = {
 }
 
 
-class Task:
+class Task(pydantic.BaseModel):
     start: dt.datetime
     end: dt.datetime
     title: str
 
-    def __init__(self, start, end, title):
-        self.start = start
-        self.end = end
-        self.title = title
-
     def __str__(self):
         return f"Task({self.start}, {self.end}, {self.title})"
 
-    @classmethod
-    def random_task(cls, title="Random Task"):
-        # Get current month's first and last day
-        now = dt.datetime.now()
-        first_day = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        last_day = now.replace(day=lom(now), hour=23, minute=59, second=59, microsecond=999999)
 
-        # Generate random start time within the current month
-        import random
-        start_timestamp = random.uniform(first_day.timestamp(), last_day.timestamp())
-        start_time = dt.datetime.fromtimestamp(start_timestamp)
+def random_task(title="Random Task"):
+    # Get current month's first and last day
+    now = dt.datetime.now()
+    first_day = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    last_day = now.replace(day=lom(now), hour=23, minute=59, second=59, microsecond=999999)
 
-        # Generate random end time after start time but within the current month
-        end_timestamp = random.uniform(start_time.timestamp(), last_day.timestamp())
-        end_time = dt.datetime.fromtimestamp(end_timestamp)
+    # Generate random start time within the current month
+    import random
+    start_timestamp = random.uniform(first_day.timestamp(), last_day.timestamp())
+    start_time = dt.datetime.fromtimestamp(start_timestamp)
 
-        return cls(start_time, end_time, title + ' ' +str(random.randint(10000, 99999)))
+    # Generate random end time after start time but within the current month
+    end_timestamp = random.uniform(start_time.timestamp(), last_day.timestamp())
+    end_time = dt.datetime.fromtimestamp(end_timestamp)
+
+    return Task(start=start_time, end=end_time, title=title + ' ' +str(random.randint(10000, 99999)))
 
 
-tasks = [Task.random_task() for _ in range(11)]
+class Storage(pydantic.BaseModel):
+    tasks: list[Task]
 
+with open('tasks.json', 'r') as f:
+    storage = Storage.model_validate_json(f.read())
+
+# storage.tasks = [random_task() for _ in range(11)]
+tasks = storage.tasks
+
+with open('tasks.json', 'w') as f:
+    f.write(storage.model_dump_json())
 
 def display_timeline(lshift=0):
     columns = [f"{i: >2}" for i in range(1, lom(dt.datetime.now())+1)]
