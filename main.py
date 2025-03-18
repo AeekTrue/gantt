@@ -124,7 +124,7 @@ while True:
             task_id = int(task_id)
             task = tasks[task_id]
             task.process(args)
-        case 'new', title, start, end if start.isdigit() and end.isdigit():
+        case 'new' | 'нов', title, start, end if start.isdigit() and end.isdigit():
             today = dt.datetime.now()
             start = today.replace(day=int(start))
             end = today.replace(day=int(end))
@@ -133,7 +133,10 @@ while True:
             tasks[int(task_id)].title = ' '.join(text)
         case 'move', task_id, new_place if task_id.isdigit() and new_place.isdigit():
             tasks.insert(int(new_place), tasks.pop(int(task_id)))
-        case 'show', :
+        case 'rm', task_id if task_id.isdigit():
+            task = tasks.pop(int(task_id))
+            print('REMOVE:', task)
+        case 'ls', :
             display_tasks_on_timeline(tasks)
         case 'save',:
             with open('tasks.json', 'w') as f:
