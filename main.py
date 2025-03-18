@@ -4,7 +4,7 @@ import colorama
 import pydantic
 import json
 
-
+DATE_FORMAT = "%d.%m.%y"
 digits = {
     '0':'🯰',
     '1':'🯱',
@@ -37,7 +37,7 @@ class Task(pydantic.BaseModel):
     title: str
 
     def __str__(self):
-        return f"Task({self.start}, {self.end}, {self.title})"
+        return f"{self.title}: {self.start.strftime(DATE_FORMAT)} - {self.end.strftime(DATE_FORMAT)}"
 
     def process(self, args: list[str]):
         match args:
