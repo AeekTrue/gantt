@@ -65,10 +65,20 @@ with open('tasks.json', 'w') as f:
     f.write(storage.model_dump_json())
 
 def display_timeline(lshift=0):
-    columns = [f"{i: >2}" for i in range(1, lom(dt.datetime.now())+1)]
-    print(" "*lshift + " ".join(map(lambda x: digits.get(x[0], ' '), columns)))
-    print(" "*lshift +" ".join(map(lambda x: digits.get(x[1], ' '), columns)))
+    def make_up(x, style):
+        return style + digits.get(x, ' ') + ' ' + colorama.Fore.RESET + colorama.Back.RESET
 
+    row1 = " "*lshift
+    row2 = " "*lshift
+
+    for i in range(1, lom(dt.datetime.now())+1):
+        style = colorama.Back.GREEN + colorama.Fore.BLACK if int(i) % 2 else colorama.Back.BLACK
+        x = f"{i: >2}"
+        row1 += make_up(x[0], style)
+        row2 += make_up(x[1], style)
+    print(row1)
+    print(row2)
+    # print(, end='')
 
 
 def display_tasks_on_timeline(tasks):
