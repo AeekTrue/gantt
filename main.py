@@ -129,6 +129,8 @@ while True:
             start = today.replace(day=int(start))
             end = today.replace(day=int(end))
             tasks.append(Task(start=start, end=end, title=title))
+        case 'rename', task_id, *text if task_id.isdigit():
+            tasks[int(task_id)].title = ' '.join(text)
         case 'move', task_id, new_place if task_id.isdigit() and new_place.isdigit():
             tasks.insert(int(new_place), tasks.pop(int(task_id)))
         case 'show', :
