@@ -30,14 +30,19 @@ def lom(date):
     date = date - dt.timedelta(days=1)
     return date.day
 
+def date_range(start: dt.datetime,  stop: dt.datetime, step: dt.timedelta=dt.timedelta(days=1)):
+    cur = start
+    while cur.date() <= stop.date():
+        yield cur
+        cur += step
 
 class Task(pydantic.BaseModel):
     start: dt.datetime
     end: dt.datetime
     title: str
-
+    done: bool = False
     def __str__(self):
-        return f"{self.title}: {self.start.strftime(DATE_FORMAT)} - {self.end.strftime(DATE_FORMAT)}"
+        return f"{self.title}: {self.start.strftime(DATE_FORMAT)} - {self.end.strftime(DATE_FORMAT)}, {'DONE' if self.done else 'NOT DONE'}"
 
     def process(self, args: list[str]):
         match args:
@@ -75,16 +80,30 @@ class Storage(pydantic.BaseModel):
     tasks: list[Task]
 
 
-def display_timeline(lshift=0):
+def save_storage(storage: Storage):
+    with open('tasks.json', 'w') as f:
+        f.write(storage.model_dump_json())
+        print('Saved')
+
+
+def display_timeline(lshift=0, start_date: dt.datetime=None, end_date: dt.datetime=None):
+    today = dt.datetime.now()
+    if start_date is None:
+        start_date = today.replace(day=1)
+    if end_date is None:
+        end_date = today.replace(day=lom(today))
+
     def make_up(x, style):
         return style + digits.get(x, ' ') + ' ' + colorama.Fore.RESET + colorama.Back.RESET
 
+    row0 = " "*lshift
     row1 = " "*lshift
     row2 = " "*lshift
 
-    for i in range(1, lom(dt.datetime.now())+1):
-        style = colorama.Back.GREEN + colorama.Fore.BLACK if int(i) % 2 else colorama.Back.BLACK
-        x = f"{i: >2}"
+    for i in date_range(start_date, end_date):
+        style = colorama.Back.GREEN + colorama.Fore.BLACK if int(i.day) % 2 else colorama.Back.BLACK
+        style += colorama.Fore.RED if i.weekday() >=5 else ''
+        x = f"{i.day: >2}"
         row1 += make_up(x[0], style)
         row2 += make_up(x[1], style)
     print(row1)
@@ -94,19 +113,22 @@ def display_timeline(lshift=0):
 
 def display_tasks_on_timeline(tasks):
     task_size = 20
-    display_timeline(lshift=task_size)
-    i = 0
-    for task in tasks:
-        if i % 2 == 0:
-            print(colorama.Fore.GREEN, end="")
-        else:
-            print(colorama.Fore.WHITE, end="")
+    timeline_start = dt.datetime.today()
+    timeline_end = timeline_start + dt.timedelta(days=30)
+    display_timeline(lshift=task_size, start_date=timeline_start, end_date=timeline_end)
+    for i, task in enumerate(tasks):
+        # if i % 2 == 0:
+        #     print(colorama.Fore.GREEN, end="")
+        # else:
+        #     print(colorama.Fore.WHITE, end="")
 
-        start_day = task.start.day
-        end_day = task.end.day
+        s, e = task.start.date(), task.end.date()
+        if task.done:
+            print(colorama.Style.DIM, end="")
         task_id_and_title = str(i).rjust(2) + ' ' + task.title
-        print(task_id_and_title[:task_size].ljust(task_size)+"".join(["╶╴" if i < start_day or i > end_day else "▇▇" for i in range(1, lom(dt.datetime.now())+1)]))
-        i += 1
+        print(task_id_and_title[:task_size].ljust(task_size)+\
+            "".join(["╶╴" if day.date() < s or day.date() > e else "▇▇" for day in date_range(timeline_start, timeline_end)])\
+            + colorama.Style.RESET_ALL)
     print(colorama.Fore.RESET, end="")
 
 
@@ -124,29 +146,30 @@ while True:
             task_id = int(task_id)
             task = tasks[task_id]
             task.process(args)
-        case 'new' | 'нов', title, start, end if start.isdigit() and end.isdigit():
+        case 'new' | 'нов', *title:
             today = dt.datetime.now()
-            start = today.replace(day=int(start))
-            end = today.replace(day=int(end))
-            tasks.append(Task(start=start, end=end, title=title))
+            start = today
+            end = today
+            tasks.insert(0, Task(start=start, end=end, title=' '.join(title)))
+        case 'done', task_id if task_id.isdigit():
+            task_id = int(task_id)
+            tasks[task_id].done = not tasks[task_id].done
         case 'rename', task_id, *text if task_id.isdigit():
             tasks[int(task_id)].title = ' '.join(text)
-        case 'move', task_id, new_place if task_id.isdigit() and new_place.isdigit():
+        case 'mv', task_id, new_place if task_id.isdigit() and new_place.isdigit():
             tasks.insert(int(new_place), tasks.pop(int(task_id)))
         case 'rm', task_id if task_id.isdigit():
             task = tasks.pop(int(task_id))
             print('REMOVE:', task)
         case 'ls', :
             display_tasks_on_timeline(tasks)
-        case 'save',:
-            with open('tasks.json', 'w') as f:
-                f.write(storage.model_dump_json())
-            print('Saved')
         case 'exit',:
             break
         case _:
             print('Unknown command')
             # raise ShellException('Unknown command')
+    save_storage(storage)
+
 
 with open('tasks.json', 'w') as f:
     f.write(storage.model_dump_json())
