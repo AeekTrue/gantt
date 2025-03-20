@@ -4,6 +4,8 @@ import colorama
 import pydantic
 import json
 
+from pydantic.types import Tag
+
 DATE_FORMAT = "%d.%m.%y"
 digits = {
     '0':'🯰',
@@ -159,8 +161,10 @@ while True:
         case 'mv', task_id, new_place if task_id.isdigit() and new_place.isdigit():
             tasks.insert(int(new_place), tasks.pop(int(task_id)))
         case 'rm', task_id if task_id.isdigit():
-            task = tasks.pop(int(task_id))
-            print('REMOVE:', task)
+            task_id = int(task_id)
+            option = input('REMOVE: ' + str(tasks[task_id]) + '?')
+            if option in ['y', 'yes', 'Y', 'YES']:
+                tasks.pop(task_id)
         case 'ls', :
             display_tasks_on_timeline(tasks)
         case 'exit',:
