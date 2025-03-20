@@ -172,59 +172,10 @@ def command(func: Callable):
     return func
 
 
-@command
-def reshedule_task(*args, storage, viewer):
-    match args:
-        case task_id, *args if task_id.isdigit():
-            task_id = int(task_id)
-            task = viewer.tasks[task_id]
-            task.process(args)
-
-@command
-def list_tasks(*args, storage, viewer):
-    viewer.display_tasks_on_timeline()
-
-
 def parser(cmd:str):
     command, *args = cmd.split(' ')
+    if command not in CommandManager.commands:
+        print('Unknown command')
+        return
     function = CommandManager.commands[command]
     function(*args, storage=CommandManager.storage, viewer=CommandManager.viewer)
-
-# def parser(cmd):
-#     cmd = cmd.split(' ')
-#     match cmd:
-#         case task_id, *args if task_id.isdigit():
-#             task_id = int(task_id)
-#             task = viewer.tasks[task_id]
-#             task.process(args)
-#         case 'new' | 'нов', *title:
-#             today = dt.datetime.now()
-#             start = today
-#             end = today
-#             storage.tasks.insert(0, Task(start=start, end=end, title=' '.join(title)))
-#         case 'done', task_id if task_id.isdigit():
-#             task_id = int(task_id)
-#             viewer.tasks[task_id].done = not viewer.tasks[task_id].done
-#         case 'rename', task_id, *text if task_id.isdigit():
-#             viewer.tasks[int(task_id)].title = ' '.join(text)
-#         case 'mv', task_id, new_place if task_id.isdigit() and new_place.isdigit():
-#             task = storage.tasks.pop(int(task_id))
-#             print('MOVE:', task)
-#             storage.tasks.insert(int(new_place), task)
-#         case 'rm', task_id if task_id.isdigit():
-#             task_id = int(task_id)
-#             option = input('REMOVE: ' + str(storage.tasks[task_id]) + '?')
-#             if option in ['y', 'yes', 'Y', 'YES']:
-#                 storage.tasks.pop(task_id)
-#         case 'backup',:
-#             backup_storage(storage)
-#         case 'hidedone',:
-#             viewer.hide_done()
-#         case 'viewall',:
-#             viewer.reset_filter()
-#         case 'ls', :
-#             viewer.display_tasks_on_timeline()
-#         case _:
-#             print('Unknown command')
-#             # raise ShellException('Unknown command')
-#     save_storage(storage)

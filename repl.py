@@ -2,6 +2,7 @@ import code
 from types import ModuleType
 from typing import Optional, Dict, List
 from gantt import parser, CommandManager
+import commands
 import os
 
 readline: Optional[ModuleType]
