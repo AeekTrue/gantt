@@ -152,7 +152,7 @@ class TaskViewer:
                 + colorama.Style.RESET_ALL)
         print(colorama.Fore.RESET, end="")
 
-
+### INIT ###
 with open('tasks.json', 'r') as f:
     storage = TaskStorage.model_validate_json(f.read())
 
@@ -160,8 +160,10 @@ with open('tasks.json', 'r') as f:
 viewer = TaskViewer(storage)
 
 viewer.display_tasks_on_timeline()
-while True:
-    cmd = input('>>>').split(' ')
+###########
+
+def parser(cmd):
+    cmd = cmd.split(' ')
     match cmd:
         case task_id, *args if task_id.isdigit():
             task_id = int(task_id)
@@ -188,20 +190,13 @@ while True:
                 storage.tasks.pop(task_id)
         case 'backup',:
             backup_storage(storage)
-
         case 'hidedone',:
             viewer.hide_done()
         case 'viewall',:
             viewer.reset_filter()
         case 'ls', :
             viewer.display_tasks_on_timeline()
-        case 'exit',:
-            break
         case _:
             print('Unknown command')
             # raise ShellException('Unknown command')
     save_storage(storage)
-
-
-with open('tasks.json', 'w') as f:
-    f.write(storage.model_dump_json())
