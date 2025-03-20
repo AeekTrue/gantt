@@ -1,10 +1,11 @@
-from gantt import command, Task, backup_storage
+from gantt import command, Task, backup_storage, TaskViewer
 import datetime as dt
 
 
 @command.alias('ls')
-def list_tasks(*args, storage, viewer):
-    viewer.display_tasks_on_timeline()
+def list_tasks(*args, storage, viewer: TaskViewer):
+    viewer.display_tasks_on_timeline(filtering=lambda x: not x.done)
+
 
 
 @command.alias('edit')
@@ -72,15 +73,5 @@ def backup(*args, storage, viewer):
 
 
 @command
-def hide_done(*args, storage, viewer):
-    match args:
-        case []:
-            viewer.hide_done()
-
-
-@command
 def view_all(*args, storage, viewer):
-    match args:
-        case []:
-            viewer.reset_filter()
-            viewer.display_tasks_on_timeline()
+    viewer.display_tasks_on_timeline()

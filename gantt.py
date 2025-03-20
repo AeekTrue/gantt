@@ -125,24 +125,15 @@ class TaskViewer:
         self.storage = storage
         self.tasks = storage.tasks
 
-    def hide_done(self):
-        self.tasks = list(filter(lambda x: not x.done, self.tasks))
 
-    def reset_filter(self):
-        self.tasks = self.storage.tasks
-
-
-    def display_tasks_on_timeline(self):
+    def display_tasks_on_timeline(self, filtering: Callable[[Task], bool] = lambda x: True):
         task_size = 20
         timeline_start = dt.datetime.today()
         timeline_end = timeline_start + dt.timedelta(days=30)
         display_timeline(lshift=task_size, start_date=timeline_start, end_date=timeline_end)
         for i, task in enumerate(self.tasks):
-            # if i % 2 == 0:
-            #     print(colorama.Fore.GREEN, end="")
-            # else:
-            #     print(colorama.Fore.WHITE, end="")
-
+            if not filtering(task):
+                continue
             s, e = task.start.date(), task.end.date()
             if task.done:
                 print(colorama.Style.DIM, end="")
