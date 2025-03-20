@@ -1,10 +1,25 @@
 from gantt import command, Task, backup_storage, TaskViewer
 import datetime as dt
 
+@command.alias('show')
+def show_task(*args, storage, viewer):
+    match args:
+        case task_id, if task_id.isdigit():
+            task_id = int(task_id)
+            if 0 <= task_id < len(viewer.tasks):
+                print(viewer.tasks[task_id])
+            else:
+                print(f"Task with ID {task_id} not found.")
+        case _:
+            print("Usage: show <task_id>")
 
 @command.alias('ls')
 def list_tasks(*args, storage, viewer: TaskViewer):
-    viewer.display_tasks_on_timeline(filtering=lambda x: not x.done)
+    show_all = '-a' in args
+    if show_all:
+        viewer.display_tasks_on_timeline()
+    else:
+        viewer.display_tasks_on_timeline(filtering=lambda x: not x.done)
 
 
 
@@ -70,8 +85,3 @@ def backup(*args, storage, viewer):
     match args:
         case []:
             backup_storage(storage)
-
-
-@command
-def view_all(*args, storage, viewer):
-    viewer.display_tasks_on_timeline()
