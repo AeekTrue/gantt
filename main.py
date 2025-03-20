@@ -87,6 +87,11 @@ def save_storage(storage: Storage):
         f.write(storage.model_dump_json())
         print('Saved')
 
+def backup_storage(storage: Storage):
+    with open('tasks.json.bak', 'w') as f:
+        f.write(storage.model_dump_json())
+        print('Backed up')
+
 
 def display_timeline(lshift=0, start_date: dt.datetime=None, end_date: dt.datetime=None):
     today = dt.datetime.now()
@@ -165,6 +170,8 @@ while True:
             option = input('REMOVE: ' + str(tasks[task_id]) + '?')
             if option in ['y', 'yes', 'Y', 'YES']:
                 tasks.pop(task_id)
+        case 'backup',:
+            backup_storage(storage)
         case 'ls', :
             display_tasks_on_timeline(tasks)
         case 'exit',:
