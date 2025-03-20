@@ -43,8 +43,10 @@ class Task(pydantic.BaseModel):
     end: dt.datetime
     title: str
     done: bool = False
+    tags: List[str] = pydantic.Field(default_factory=list)
+
     def __str__(self):
-        return f"{self.title}: {self.start.strftime(DATE_FORMAT)} - {self.end.strftime(DATE_FORMAT)}, {'DONE' if self.done else 'NOT DONE'}"
+        return f"{self.title}: {self.start.strftime(DATE_FORMAT)} - {self.end.strftime(DATE_FORMAT)}, {'DONE' if self.done else 'NOT DONE'}\n[{' '.join(self.tags)}]"
 
     def process(self, args: list[str]):
         match args:
