@@ -166,10 +166,23 @@ class CommandManager(TaskStorageAware, TaskViewAware):
     commands: Dict[str, Callable] = dict()
 
 
-def command(func: Callable):
-    print(func.__name__, 'added as command')
-    CommandManager.commands[func.__name__] = func
-    return func
+class CommandDecorator:
+    def __init__(self) -> None:
+        pass
+
+    def __call__(self, func: Callable):
+        # print(func.__name__, 'added as command')
+        CommandManager.commands[func.__name__] = func
+        return func
+
+    def alias(self, alt_name:str):
+        def inner(func: Callable):
+            CommandManager.commands[alt_name] = func
+
+            return func
+        return inner
+
+command = CommandDecorator()
 
 
 def parser(cmd:str):

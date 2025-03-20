@@ -1,12 +1,12 @@
 from gantt import command, Task, backup_storage
 
 
-@command
+@command.alias('ls')
 def list_tasks(*args, storage, viewer):
     viewer.display_tasks_on_timeline()
 
 
-@command
+@command.alias('edit')
 def reshedule_task(*args, storage, viewer):
     match args:
         case task_id, *args if task_id.isdigit():
@@ -14,7 +14,7 @@ def reshedule_task(*args, storage, viewer):
             task = viewer.tasks[task_id]
             task.process(args)
 
-@command
+@command.alias('new')
 def new_task(*args, storage, viewer):
     match args:
         case title:
@@ -25,7 +25,7 @@ def new_task(*args, storage, viewer):
             storage.tasks.insert(0, Task(start=start, end=end, title=' '.join(title)))
 
 
-@command
+@command.alias('done')
 def mark_done(*args, storage, viewer):
     match args:
         case task_id, if task_id.isdigit():
@@ -33,14 +33,14 @@ def mark_done(*args, storage, viewer):
             viewer.tasks[task_id].done = not viewer.tasks[task_id].done
 
 
-@command
+@command.alias('rename')
 def rename_task(*args, storage, viewer):
     match args:
         case task_id, *text if task_id.isdigit():
             viewer.tasks[int(task_id)].title = ' '.join(text)
 
 
-@command
+@command.alias('mv')
 def move_task(*args, storage, viewer):
     match args:
         case task_id, new_place if task_id.isdigit() and new_place.isdigit():
@@ -49,7 +49,7 @@ def move_task(*args, storage, viewer):
             storage.tasks.insert(int(new_place), task)
 
 
-@command
+@command.alias('rm')
 def remove_task(*args, storage, viewer):
     match args:
         case task_id, if task_id.isdigit():
@@ -78,3 +78,4 @@ def view_all(*args, storage, viewer):
     match args:
         case []:
             viewer.reset_filter()
+            viewer.display_tasks_on_timeline()
