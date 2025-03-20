@@ -182,9 +182,6 @@ class CommandDecorator:
             return func
         return inner
 
-command = CommandDecorator()
-
-
 def parser(cmd:str):
     command, *args = cmd.split(' ')
     if command not in CommandManager.commands:
@@ -192,3 +189,6 @@ def parser(cmd:str):
         return
     function = CommandManager.commands[command]
     function(*args, storage=CommandManager.storage, viewer=CommandManager.viewer)
+    save_storage(CommandManager.storage)
+
+command = CommandDecorator()

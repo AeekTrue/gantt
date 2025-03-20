@@ -1,4 +1,5 @@
 from gantt import command, Task, backup_storage
+import datetime as dt
 
 
 @command.alias('ls')
@@ -16,13 +17,17 @@ def reshedule_task(*args, storage, viewer):
 
 @command.alias('new')
 def new_task(*args, storage, viewer):
+    title = 'No name'
     match args:
-        case title:
-            import datetime as dt
-            today = dt.datetime.now()
-            start = today
-            end = today
-            storage.tasks.insert(0, Task(start=start, end=end, title=' '.join(title)))
+        case []:
+            title = input('Title: ')
+        case _:
+            title = ' '.join(args)
+
+    today = dt.datetime.now()
+    start = today
+    end = today
+    storage.tasks.insert(0, Task(start=start, end=end, title=title))
 
 
 @command.alias('done')
