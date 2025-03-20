@@ -78,16 +78,16 @@ def random_task(title="Random Task"):
     return Task(start=start_time, end=end_time, title=title + ' ' +str(random.randint(10000, 99999)))
 
 
-class Storage(pydantic.BaseModel):
+class TaskStorage(pydantic.BaseModel):
     tasks: list[Task]
 
 
-def save_storage(storage: Storage):
+def save_storage(storage: TaskStorage):
     with open('tasks.json', 'w') as f:
         f.write(storage.model_dump_json())
         print('Saved')
 
-def backup_storage(storage: Storage):
+def backup_storage(storage: TaskStorage):
     with open('tasks.json.bak', 'w') as f:
         f.write(storage.model_dump_json())
         print('Backed up')
@@ -118,62 +118,81 @@ def display_timeline(lshift=0, start_date: dt.datetime=None, end_date: dt.dateti
     # print(, end='')
 
 
-def display_tasks_on_timeline(tasks):
-    task_size = 20
-    timeline_start = dt.datetime.today()
-    timeline_end = timeline_start + dt.timedelta(days=30)
-    display_timeline(lshift=task_size, start_date=timeline_start, end_date=timeline_end)
-    for i, task in enumerate(tasks):
-        # if i % 2 == 0:
-        #     print(colorama.Fore.GREEN, end="")
-        # else:
-        #     print(colorama.Fore.WHITE, end="")
+class TaskViewer:
+    def __init__(self, storage: TaskStorage) -> None:
+        self.storage = storage
+        self.tasks = storage.tasks
 
-        s, e = task.start.date(), task.end.date()
-        if task.done:
-            print(colorama.Style.DIM, end="")
-        task_id_and_title = str(i).rjust(2) + ' ' + task.title
-        print(task_id_and_title[:task_size].ljust(task_size)+\
-            "".join(["╶╴" if day.date() < s or day.date() > e else "▇▇" for day in date_range(timeline_start, timeline_end)])\
-            + colorama.Style.RESET_ALL)
-    print(colorama.Fore.RESET, end="")
+    def hide_done(self):
+        self.tasks = list(filter(lambda x: not x.done, self.tasks))
+
+    def reset_filter(self):
+        self.tasks = self.storage.tasks
+
+
+    def display_tasks_on_timeline(self):
+        task_size = 20
+        timeline_start = dt.datetime.today()
+        timeline_end = timeline_start + dt.timedelta(days=30)
+        display_timeline(lshift=task_size, start_date=timeline_start, end_date=timeline_end)
+        for i, task in enumerate(self.tasks):
+            # if i % 2 == 0:
+            #     print(colorama.Fore.GREEN, end="")
+            # else:
+            #     print(colorama.Fore.WHITE, end="")
+
+            s, e = task.start.date(), task.end.date()
+            if task.done:
+                print(colorama.Style.DIM, end="")
+            task_id_and_title = str(i).rjust(2) + ' ' + task.title
+            print(task_id_and_title[:task_size].ljust(task_size)+\
+                "".join(["╶╴" if day.date() < s or day.date() > e else "▇▇" for day in date_range(timeline_start, timeline_end)])\
+                + colorama.Style.RESET_ALL)
+        print(colorama.Fore.RESET, end="")
 
 
 with open('tasks.json', 'r') as f:
-    storage = Storage.model_validate_json(f.read())
+    storage = TaskStorage.model_validate_json(f.read())
 
 # storage.tasks = [random_task() for _ in range(11)]
-tasks = storage.tasks
+viewer = TaskViewer(storage)
 
-display_tasks_on_timeline(tasks)
+viewer.display_tasks_on_timeline()
 while True:
     cmd = input('>>>').split(' ')
     match cmd:
         case task_id, *args if task_id.isdigit():
             task_id = int(task_id)
-            task = tasks[task_id]
+            task = viewer.tasks[task_id]
             task.process(args)
         case 'new' | 'нов', *title:
             today = dt.datetime.now()
             start = today
             end = today
-            tasks.insert(0, Task(start=start, end=end, title=' '.join(title)))
+            storage.tasks.insert(0, Task(start=start, end=end, title=' '.join(title)))
         case 'done', task_id if task_id.isdigit():
             task_id = int(task_id)
-            tasks[task_id].done = not tasks[task_id].done
+            viewer.tasks[task_id].done = not viewer.tasks[task_id].done
         case 'rename', task_id, *text if task_id.isdigit():
-            tasks[int(task_id)].title = ' '.join(text)
+            viewer.tasks[int(task_id)].title = ' '.join(text)
         case 'mv', task_id, new_place if task_id.isdigit() and new_place.isdigit():
-            tasks.insert(int(new_place), tasks.pop(int(task_id)))
+            task = storage.tasks.pop(int(task_id))
+            print('MOVE:', task)
+            storage.tasks.insert(int(new_place), task)
         case 'rm', task_id if task_id.isdigit():
             task_id = int(task_id)
-            option = input('REMOVE: ' + str(tasks[task_id]) + '?')
+            option = input('REMOVE: ' + str(storage.tasks[task_id]) + '?')
             if option in ['y', 'yes', 'Y', 'YES']:
-                tasks.pop(task_id)
+                storage.tasks.pop(task_id)
         case 'backup',:
             backup_storage(storage)
+
+        case 'hidedone',:
+            viewer.hide_done()
+        case 'viewall',:
+            viewer.reset_filter()
         case 'ls', :
-            display_tasks_on_timeline(tasks)
+            viewer.display_tasks_on_timeline()
         case 'exit',:
             break
         case _:
