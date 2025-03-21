@@ -21,7 +21,22 @@ def list_tasks(*args, storage, viewer: TaskViewer):
     else:
         viewer.display_tasks_on_timeline(filtering=lambda x: not x.done)
 
+@command.alias('filter')
+def filter_tasks(*args, storage, viewer):
+    if not args:
+        print("Usage: filter <filter_expression>")
+        return
 
+    filter_expr = ' '.join(args)
+    try:
+        # Create a lambda function from the filter expression
+        filter_func = eval(f"lambda task: {filter_expr}", {'dt': dt})
+
+        # Apply the filter and display filtered tasks
+        viewer.display_tasks_on_timeline(filtering=filter_func)
+    except Exception as e:
+        print(f"Error in filter expression: {e}")
+        print("Example: 'filter not task.done' or 'filter \"project\" in task.title'")
 
 @command.alias('edit')
 def reshedule_task(*args, storage, viewer):
