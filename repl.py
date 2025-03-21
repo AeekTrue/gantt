@@ -36,7 +36,7 @@ class Completer:
 
 
 REPL_HISTFILE = 'dev-history' # os.path.expanduser(f".{APPNAME}-history")  # arbitrary name
-REPL_HISTFILE_SIZE = 1000
+REPL_HISTFILE_SIZE = 10000
 if readline and os.path.exists(REPL_HISTFILE):
     readline.read_history_file(REPL_HISTFILE)
 
