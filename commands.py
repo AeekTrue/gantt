@@ -1,6 +1,7 @@
 from gantt import command, Task, backup_storage, TaskViewer
 import datetime as dt
 
+
 @command.alias('show')
 def show_task(*args, storage, viewer):
     match args:
@@ -13,6 +14,7 @@ def show_task(*args, storage, viewer):
         case _:
             print("Usage: show <task_id>")
 
+
 @command.alias('ls')
 def list_tasks(*args, storage, viewer: TaskViewer):
     show_all = '-a' in args
@@ -20,6 +22,7 @@ def list_tasks(*args, storage, viewer: TaskViewer):
         viewer.display_tasks_on_timeline()
     else:
         viewer.display_tasks_on_timeline(filtering=lambda x: not x.done)
+
 
 @command.alias('filter')
 def filter_tasks(*args, storage, viewer):
@@ -30,13 +33,14 @@ def filter_tasks(*args, storage, viewer):
     filter_expr = ' '.join(args)
     try:
         # Create a lambda function from the filter expression
-        filter_func = eval(f"lambda task: {filter_expr}", {'dt': dt})
+        filter_func = eval(f"lambda task: {filter_expr}", {'td': lambda x: dt.datetime.today() + dt.timedelta(days=x)})
 
         # Apply the filter and display filtered tasks
         viewer.display_tasks_on_timeline(filtering=filter_func)
     except Exception as e:
         print(f"Error in filter expression: {e}")
         print("Example: 'filter not task.done' or 'filter \"project\" in task.title'")
+
 
 @command.alias('edit')
 def reshedule_task(*args, storage, viewer):
@@ -100,3 +104,16 @@ def backup(*args, storage, viewer):
     match args:
         case []:
             backup_storage(storage)
+
+@command
+def mark(*args: str, storage, viewer: TaskViewer):
+    match args:
+        case task_id, *tags if task_id.isdigit():
+            task_id = int(task_id)
+            task = viewer.tasks[task_id]
+            for tag in tags:
+                if tag.startswith('-'):
+                    tags.remove(tag)
+                else:
+                    tag = tag.removeprefix('+')
+                    task.tags.add(tag)
