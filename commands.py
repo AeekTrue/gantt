@@ -32,8 +32,14 @@ def filter_tasks(*args, storage, viewer):
 
     filter_expr = ' '.join(args)
     try:
-        # Create a lambda function from the filter expression
-        filter_func = eval(f"lambda task: {filter_expr}", {'td': lambda x: dt.datetime.today() + dt.timedelta(days=x)})
+        environment = {
+            'td': lambda x: dt.datetime.today() + dt.timedelta(days=x),
+            'today': dt.date.today(),
+        }
+
+        filter_wrapper = lambda task, tags, start, end: eval(f"{filter_expr}",
+            environment, {'task': task, 'tags': tags, 'start': start})
+        filter_func = lambda task: filter_wrapper(task, task.tags, task.start, task.end)
 
         # Apply the filter and display filtered tasks
         viewer.display_tasks_on_timeline(filtering=filter_func)
