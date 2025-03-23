@@ -54,8 +54,15 @@ class Task(pydantic.BaseModel):
                 print(self)
             case a, b if a.isdigit() and b.isdigit():
                 a, b = int(a), int(b)
-                self.start = self.start.replace(day=a)
-                self.end = self.end.replace(day=b)
+                today = dt.datetime.now()
+                new_start = today.replace(day=a)
+                if new_start < dt.datetime.now():
+                    new_start = new_start.replace(month=self.start.month+1)
+                self.start = new_start
+                new_end = today.replace(day=b)
+                if new_end < dt.datetime.now():
+                    new_end = new_end.replace(month=self.end.month+1)
+                self.end = new_end
             case _:
                 print('Unknown args')
                 # raise ShellException()
