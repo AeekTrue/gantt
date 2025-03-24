@@ -56,11 +56,11 @@ class Task(pydantic.BaseModel):
                 a, b = int(a), int(b)
                 today = dt.datetime.now()
                 new_start = today.replace(day=a)
-                if new_start < dt.datetime.now():
+                if new_start.date() < dt.date.today():
                     new_start = new_start.replace(month=self.start.month+1)
                 self.start = new_start
                 new_end = today.replace(day=b)
-                if new_end < dt.datetime.now():
+                if new_end.date() < dt.date.today():
                     new_end = new_end.replace(month=self.end.month+1)
                 self.end = new_end
             case _:
