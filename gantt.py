@@ -112,19 +112,17 @@ def display_timeline(lshift=0, start_date: dt.datetime=None, end_date: dt.dateti
     def make_up(x, style):
         return style + digits.get(x, ' ') + ' ' + colorama.Fore.RESET + colorama.Back.RESET
 
-    row0 = " "*lshift
     row1 = " "*lshift
     row2 = " "*lshift
 
-    for i in date_range(start_date, end_date):
-        style = colorama.Back.GREEN + colorama.Fore.BLACK if int(i.day) % 2 else colorama.Back.BLACK
-        style += colorama.Fore.RED if i.weekday() >=5 else ''
-        x = f"{i.day: >2}"
+    for i, date in enumerate(date_range(start_date, end_date)):
+        style = colorama.Fore.RED if date.weekday() >=5 else ''
+        style += colorama.Back.BLUE if (i+1) % 2 else ''
+        x = f"{date.day: >2}"
         row1 += make_up(x[0], style)
         row2 += make_up(x[1], style)
     print(row1)
     print(row2)
-    # print(, end='')
 
 
 class TaskViewer:
