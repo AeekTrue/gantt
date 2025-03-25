@@ -40,7 +40,6 @@ REPL_HISTFILE_SIZE = 10000
 if readline and os.path.exists(REPL_HISTFILE):
     readline.read_history_file(REPL_HISTFILE)
 
-env = {"add": lambda x, y: x + y, "abs": abs}
 if readline:
     readline.set_completer(Completer(CommandManager.commands).complete)
     readline.parse_and_bind("tab: complete")

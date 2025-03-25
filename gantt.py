@@ -160,7 +160,10 @@ class TaskViewAware:
 
 class CommandManager(TaskStorageAware, TaskViewAware):
     commands: Dict[str, Callable] = dict()
+    aliases: Dict[str, str] = dict()
 
+    def set_alias(self, alias: str, command: str):
+        self.aliases[alias] = command
 
 class CommandDecorator:
     def __init__(self) -> None:
@@ -170,6 +173,12 @@ class CommandDecorator:
         # print(func.__name__, 'added as command')
         CommandManager.commands[func.__name__] = func
         return func
+
+    def alias(self, alias: str):
+        def decorator(func: Callable):
+            CommandManager.aliases[alias] = func.__name__
+            return func
+        return decorator
 
 def parser(cmd:str):
     command, *args = cmd.split(' ')

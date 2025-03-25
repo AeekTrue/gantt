@@ -3,6 +3,7 @@ import datetime as dt
 
 
 @command
+@command.alias('show')
 def show_task(*args, storage, viewer):
     match args:
         case task_id, if task_id.isdigit():
