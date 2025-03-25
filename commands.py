@@ -59,16 +59,17 @@ def reshedule_task(*args, storage, viewer):
 @command.alias('new')
 def new_task(*args, storage, viewer):
     title = 'No name'
-    match args:
-        case []:
-            title = input('Title: ')
-        case _:
-            title = ' '.join(args)
-
     today = dt.datetime.now()
     start = today
     end = today
-    storage.tasks.insert(0, Task(start=start, end=end, title=title))
+    match args:
+        case []:
+            while (title := input('Title: ')) != '':
+                storage.tasks.insert(0, Task(start=start, end=end, title=title))
+        case _:
+            title = ' '.join(args)
+            storage.tasks.insert(0, Task(start=start, end=end, title=title))
+
 
 
 @command.alias('done')
