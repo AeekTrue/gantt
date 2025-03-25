@@ -80,7 +80,7 @@ def mark_done(*args, storage, viewer):
             viewer.tasks[task_id].done = not viewer.tasks[task_id].done
 
 
-@command.alias('rename')
+@command
 def rename_task(*args, storage, viewer):
     match args:
         case task_id, *text if task_id.isdigit():
