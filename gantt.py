@@ -171,13 +171,6 @@ class CommandDecorator:
         CommandManager.commands[func.__name__] = func
         return func
 
-    def alias(self, alt_name:str):
-        def inner(func: Callable):
-            CommandManager.commands[alt_name] = func
-
-            return func
-        return inner
-
 def parser(cmd:str):
     command, *args = cmd.split(' ')
     if command not in CommandManager.commands:
