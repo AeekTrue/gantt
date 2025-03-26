@@ -148,5 +148,5 @@ def tags(*args, storage, viewer: TaskViewer):
     for task in viewer.tasks:
         for tag in task.tags:
             tags[tag] = tags.get(tag, 0) + 1
-    for tag, freq in tags.items():
+    for tag, freq in sorted(tags.items(), key=lambda x: x[1], reverse=True):
         print(f"{tag: <12}:{freq}")
