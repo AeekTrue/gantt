@@ -140,3 +140,13 @@ def alias(*args, storage, viewer: TaskViewer):
         case alias, *command:
             CommandManager.set_alias(alias, ' '.join(command))
             print(f"Alias {alias} set to {command}")
+
+@command
+def tags(*args, storage, viewer: TaskViewer):
+    '''Display all tags and their frequency'''
+    tags = dict()
+    for task in viewer.tasks:
+        for tag in task.tags:
+            tags[tag] = tags.get(tag, 0) + 1
+    for tag, freq in tags.items():
+        print(f"{tag: <12}:{freq}")
