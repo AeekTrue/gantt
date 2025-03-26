@@ -127,7 +127,7 @@ def display_timeline(lshift=0, start_date: dt.datetime=None, end_date: dt.dateti
         if weekend:
             style += colorama.Back.LIGHTRED_EX if (i+1) % 2 else colorama.Back.RED
         else:
-            style += colorama.Back.BLACK if (i+1) % 2 else colorama.Back.LIGHTBLACK_EX
+            style += colorama.Back.WHITE if (i+1) % 2 else colorama.Back.LIGHTBLACK_EX
         row0 += make_up(weekday, style, offset=0)
 
 
