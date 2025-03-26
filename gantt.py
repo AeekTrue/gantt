@@ -19,7 +19,7 @@ digits = {
     '8':'🯸',
     '9':'🯹',
 }
-
+week_days = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
 
 class ShellException(Exception):
     pass
@@ -109,20 +109,31 @@ def display_timeline(lshift=0, start_date: dt.datetime=None, end_date: dt.dateti
     if end_date is None:
         end_date = today.replace(day=lom(today))
 
-    def make_up(x, style):
-        return style + digits.get(x, ' ') + ' ' + colorama.Fore.RESET + colorama.Back.RESET
-
+    def make_up(x, style, offset=1):
+        return style + digits.get(x, x) + ' '*offset + colorama.Fore.RESET + colorama.Back.RESET
+    row0 = " "*lshift
     row1 = " "*lshift
     row2 = " "*lshift
 
     for i, date in enumerate(date_range(start_date, end_date)):
-        style = colorama.Fore.RED if date.weekday() >=5 else ''
-        style += colorama.Back.BLUE if (i+1) % 2 else ''
+        weekend = date.weekday() >= 5
+        style = colorama.Fore.RED if weekend else ''
         x = f"{date.day: >2}"
+        weekday = week_days[date.weekday()]
         row1 += make_up(x[0], style)
         row2 += make_up(x[1], style)
+
+        style = colorama.Fore.BLACK
+        if weekend:
+            style += colorama.Back.LIGHTRED_EX if (i+1) % 2 else colorama.Back.RED
+        else:
+            style += colorama.Back.BLACK if (i+1) % 2 else colorama.Back.LIGHTBLACK_EX
+        row0 += make_up(weekday, style, offset=0)
+
+
     print(row1)
     print(row2)
+    print(row0)
 
 
 class TaskViewer:
