@@ -171,7 +171,11 @@ class TaskViewAware:
 
 class CommandManager(TaskStorageAware, TaskViewAware):
     commands: Dict[str, Callable] = dict()
+    aliases: Dict[str, str] = dict()
 
+    @classmethod
+    def set_alias(cls, alias: str, command: str):
+        cls.aliases[alias] = command
 
 class CommandDecorator:
     def __init__(self) -> None:
@@ -182,19 +186,26 @@ class CommandDecorator:
         CommandManager.commands[func.__name__] = func
         return func
 
-    def alias(self, alt_name:str):
-        def inner(func: Callable):
-            CommandManager.commands[alt_name] = func
-
+    def alias(self, alias: str):
+        def decorator(func: Callable):
+            CommandManager.aliases[alias] = func.__name__
             return func
-        return inner
+        return decorator
+
+def tokentize(cmd: str):
+    return cmd.split(' ')
 
 def parser(cmd:str):
-    command, *args = cmd.split(' ')
-    if command not in CommandManager.commands:
-        print('Unknown command')
+    command, *args = tokentize(cmd)
+    if command in CommandManager.aliases:
+        alias = CommandManager.aliases[command]
+        command, *args = tokentize(alias) + args
+
+    function = CommandManager.commands.get(command)
+    if function is None:
+        print(f"Command {command} not found")
         return
-    function = CommandManager.commands[command]
+
     function(*args, storage=CommandManager.storage, viewer=CommandManager.viewer)
     save_storage(CommandManager.storage)
 

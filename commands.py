@@ -1,7 +1,9 @@
-from gantt import command, Task, backup_storage, TaskViewer
+from gantt import command, Task, backup_storage, TaskViewer, TaskStorage, CommandManager
 import datetime as dt
 
 
+
+@command
 @command.alias('show')
 def show_task(*args, storage, viewer):
     match args:
@@ -15,8 +17,8 @@ def show_task(*args, storage, viewer):
             print("Usage: show <task_id>")
 
 
-@command.alias('ls')
-def list_tasks(*args, storage, viewer: TaskViewer):
+@command
+def ls(*args, storage, viewer: TaskViewer):
     show_all = '-a' in args
     if show_all:
         viewer.display_tasks_on_timeline()
@@ -24,7 +26,7 @@ def list_tasks(*args, storage, viewer: TaskViewer):
         viewer.display_tasks_on_timeline(filtering=lambda x: not x.done)
 
 
-@command.alias('filter')
+@command
 def filter_tasks(*args, storage, viewer):
     if not args:
         print("Usage: filter <filter_expression>")
@@ -48,7 +50,7 @@ def filter_tasks(*args, storage, viewer):
         print("Example: 'filter not task.done' or 'filter \"project\" in task.title'")
 
 
-@command.alias('edit')
+@command
 def reshedule_task(*args, storage, viewer):
     match args:
         case task_id, *args if task_id.isdigit():
@@ -56,7 +58,7 @@ def reshedule_task(*args, storage, viewer):
             task = viewer.tasks[task_id]
             task.process(args)
 
-@command.alias('new')
+@command
 def new_task(*args, storage, viewer):
     title = 'No name'
     today = dt.datetime.now()
@@ -72,7 +74,7 @@ def new_task(*args, storage, viewer):
 
 
 
-@command.alias('done')
+@command
 def mark_done(*args, storage, viewer):
     match args:
         case task_id, if task_id.isdigit():
@@ -80,14 +82,14 @@ def mark_done(*args, storage, viewer):
             viewer.tasks[task_id].done = not viewer.tasks[task_id].done
 
 
-@command.alias('rename')
+@command
 def rename_task(*args, storage, viewer):
     match args:
         case task_id, *text if task_id.isdigit():
             viewer.tasks[int(task_id)].title = ' '.join(text)
 
 
-@command.alias('mv')
+@command
 def move_task(*args, storage, viewer):
     match args:
         case task_id, new_place if task_id.isdigit() and new_place.isdigit():
@@ -96,7 +98,7 @@ def move_task(*args, storage, viewer):
             storage.tasks.insert(int(new_place), task)
 
 
-@command.alias('rm')
+@command
 def remove_task(*args, storage, viewer):
     match args:
         case task_id, if task_id.isdigit():
@@ -124,3 +126,13 @@ def mark(*args: str, storage, viewer: TaskViewer):
                 else:
                     tag = tag.removeprefix('+')
                     task.tags.add(tag)
+
+
+@command
+def alias(*args, storage, viewer: TaskViewer):
+    match args:
+        case []:
+            print(CommandManager.aliases)
+        case alias, *command:
+            CommandManager.set_alias(alias, ' '.join(command))
+            print(f"Alias {alias} set to {command}")
