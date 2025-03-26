@@ -48,26 +48,6 @@ class Task(pydantic.BaseModel):
     def __str__(self):
         return f"{self.title}: {self.start.strftime(DATE_FORMAT)} - {self.end.strftime(DATE_FORMAT)}, {'DONE' if self.done else 'NOT DONE'}\n[{' '.join(self.tags)}]"
 
-    def process(self, args: list[str]):
-        match args:
-            case []:
-                print(self)
-            case a, b if a.isdigit() and b.isdigit():
-                a, b = int(a), int(b)
-                today = dt.datetime.now()
-                new_start = today.replace(day=a)
-                if new_start.date() < dt.date.today():
-                    new_start = new_start.replace(month=self.start.month+1)
-                self.start = new_start
-                new_end = today.replace(day=b)
-                if new_end.date() < dt.date.today():
-                    new_end = new_end.replace(month=self.end.month+1)
-                self.end = new_end
-            case _:
-                print('Unknown args')
-                # raise ShellException()
-
-
 
 def random_task(title="Random Task"):
     # Get current month's first and last day

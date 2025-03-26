@@ -70,7 +70,20 @@ def reshedule_task(*args, storage, viewer):
         case task_id, *args if task_id.isdigit():
             task_id = int(task_id)
             task = viewer.tasks[task_id]
-            task.process(args)
+            match args:
+                case a, b if a.isdigit() and b.isdigit():
+                    a, b = int(a), int(b)
+                    today = dt.datetime.now()
+                    new_start = today.replace(day=a)
+                    if new_start.date() < dt.date.today():
+                        new_start = new_start.replace(month=task.start.month+1)
+                    task.start = new_start
+                    new_end = today.replace(day=b)
+                    if new_end.date() < dt.date.today():
+                        new_end = new_end.replace(month=task.end.month+1)
+                    task.end = new_end
+                case _:
+                    print('Unknown args')
 
 @command
 def new_task(*args, storage, viewer):
