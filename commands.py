@@ -122,7 +122,11 @@ def mark(*args: str, storage, viewer: TaskViewer):
             task = viewer.tasks[task_id]
             for tag in tags:
                 if tag.startswith('-'):
-                    tags.remove(tag)
+                    tag = tag.removeprefix('-')
+                    if tag in task.tags:
+                        task.tags.remove(tag)
+                    else:
+                        print(f"Tag {tag} not found in task {task_id}")
                 else:
                     tag = tag.removeprefix('+')
                     task.tags.add(tag)
