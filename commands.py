@@ -4,8 +4,11 @@ import datetime as dt
 
 
 @command
-@command.alias('show')
-def show_task(*args, storage, viewer):
+def show(*args, storage, viewer):
+    '''
+    Show task details
+    Usage: show_tasks <task_id>
+    '''
     match args:
         case task_id, if task_id.isdigit():
             task_id = int(task_id)
@@ -19,6 +22,13 @@ def show_task(*args, storage, viewer):
 
 @command
 def ls(*args, storage, viewer: TaskViewer):
+    '''
+    List all tasks
+    Usage: ls [-a]
+    Params:
+        -a: Show all tasks including done tasks
+    '''
+
     show_all = '-a' in args
     if show_all:
         viewer.display_tasks_on_timeline()
@@ -28,6 +38,10 @@ def ls(*args, storage, viewer: TaskViewer):
 
 @command
 def filter_tasks(*args, storage, viewer):
+    '''
+    Filter tasks based on a filter expression
+    Usage: filter <filter_expression>
+    '''
     if not args:
         print("Usage: filter <filter_expression>")
         return
@@ -150,3 +164,15 @@ def tags(*args, storage, viewer: TaskViewer):
             tags[tag] = tags.get(tag, 0) + 1
     for tag, freq in sorted(tags.items(), key=lambda x: x[1], reverse=True):
         print(f"{tag: <12}:{freq}")
+
+@command
+def help(*args, storage, viewer):
+    match args:
+        case []:
+            print("Available commands:")
+            for command in CommandManager.commands:
+                print(f"  {command}")
+        case command, if command in CommandManager.commands:
+            print(CommandManager.commands[command].__doc__)
+        case command:
+            print(f"Command {command} not found.")
