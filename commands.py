@@ -1,5 +1,6 @@
-from gantt import command, Task, backup_storage, TaskViewer
+from gantt import command, Task, backup_storage, TaskViewer, TaskStorage, CommandManager
 import datetime as dt
+
 
 
 @command
@@ -125,3 +126,13 @@ def mark(*args: str, storage, viewer: TaskViewer):
                 else:
                     tag = tag.removeprefix('+')
                     task.tags.add(tag)
+
+
+@command
+def alias(*args, storage, viewer: TaskViewer):
+    match args:
+        case []:
+            print(CommandManager.aliases)
+        case alias, *command:
+            CommandManager.set_alias(alias, ' '.join(command))
+            print(f"Alias {alias} set to {command}")
