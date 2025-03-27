@@ -37,14 +37,20 @@ class Completer:
 
 REPL_HISTFILE = 'dev-history' # os.path.expanduser(f".{APPNAME}-history")  # arbitrary name
 REPL_HISTFILE_SIZE = 10000
-if readline and os.path.exists(REPL_HISTFILE):
-    readline.read_history_file(REPL_HISTFILE)
+
+if readline:
+    try:
+        readline.read_history_file(REPL_HISTFILE)
+    except OSError as e:
+        print(f"Error reading history file {REPL_HISTFILE}: {e}")
 
 if readline:
     readline.set_completer(Completer(CommandManager.commands).complete)
     readline.parse_and_bind("tab: complete")
 
+
 repl = Repl()
+
 repl.interact(banner='Welcome to gantt chart by Aeek True!', exitmsg='')
 
 if readline:
