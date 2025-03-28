@@ -37,6 +37,7 @@ def ls(*args, storage, viewer: TaskViewer):
 
 
 @command
+@command.alias("filter")
 def filter_tasks(*args, storage, viewer):
     '''
     Filter tasks based on a filter expression
@@ -86,6 +87,7 @@ def reshedule_task(*args, storage, viewer):
                     print('Unknown args')
 
 @command
+@command.alias("new")
 def new_task(*args, storage, viewer):
     title = 'No name'
     today = dt.datetime.now()
@@ -102,6 +104,7 @@ def new_task(*args, storage, viewer):
 
 
 @command
+@command.alias("done")
 def mark_done(*args, storage, viewer):
     match args:
         case task_id, if task_id.isdigit():
@@ -110,6 +113,7 @@ def mark_done(*args, storage, viewer):
 
 
 @command
+@command.alias("rename")
 def rename_task(*args, storage, viewer):
     match args:
         case task_id, *text if task_id.isdigit():
@@ -117,6 +121,7 @@ def rename_task(*args, storage, viewer):
 
 
 @command
+CommandManager.commands CommandManager.aliases@command.alias("mv")
 def move_task(*args, storage, viewer):
     match args:
         case task_id, new_place if task_id.isdigit() and new_place.isdigit():
@@ -126,6 +131,7 @@ def move_task(*args, storage, viewer):
 
 
 @command
+@command.alias("rm")
 def remove_task(*args, storage, viewer):
     match args:
         case task_id, if task_id.isdigit():
@@ -163,7 +169,7 @@ def mark(*args: str, storage, viewer: TaskViewer):
 def alias(*args, storage, viewer: TaskViewer):
     match args:
         case []:
-            print(CommandManager.aliases)
+            print('\n'.join(k + '\t' + v for k, v in CommandManager.aliases.items()))
         case alias, *command:
             CommandManager.set_alias(alias, ' '.join(command))
             print(f"Alias {alias} set to {command}")

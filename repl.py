@@ -44,8 +44,11 @@ if readline:
     except OSError as e:
         print(f"Error reading history file {REPL_HISTFILE}: {e}")
 
+env = CommandManager.commands.copy()
+env.update(CommandManager.aliases)
+
 if readline:
-    readline.set_completer(Completer(CommandManager.commands).complete)
+    readline.set_completer(Completer(env).complete)
     readline.parse_and_bind("tab: complete")
 
 
