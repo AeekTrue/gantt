@@ -53,6 +53,8 @@ if readline:
 
 
 repl = Repl()
+for line in open('dev-rc', 'r').readlines():
+    repl.runsource(line)
 
 repl.interact(banner='Welcome to gantt chart by Aeek True!', exitmsg='')
 
