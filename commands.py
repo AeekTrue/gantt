@@ -121,7 +121,7 @@ def rename_task(*args, storage, viewer):
 
 
 @command
-CommandManager.commands CommandManager.aliases@command.alias("mv")
+@command.alias("mv")
 def move_task(*args, storage, viewer):
     match args:
         case task_id, new_place if task_id.isdigit() and new_place.isdigit():
