@@ -1,4 +1,4 @@
-from gantt import command, Task, backup_storage, TaskViewer, TaskStorage, CommandManager
+from gantt import command, Task, backup_storage, TaskViewer, TaskStorage, CommandManager, ContextManager
 import datetime as dt
 
 
@@ -33,7 +33,7 @@ def ls(*args, storage, viewer: TaskViewer):
     if show_all:
         viewer.display_tasks_on_timeline()
     else:
-        viewer.display_tasks_on_timeline(filtering=lambda x: not x.done)
+        viewer.display_tasks_on_timeline(filtering=lambda x: not x.done and (ContextManager.tag in x.tags if ContextManager.tag else True))
 
 
 @command
@@ -86,20 +86,25 @@ def reshedule_task(*args, storage, viewer):
                 case _:
                     print('Unknown args')
 
+def create_task(title, storage):
+    today = dt.datetime.now()
+    task = Task(start=today, end=today, title=title)
+    if hasattr(ContextManager, 'tag') and ContextManager.tag:
+        task.tags.add(ContextManager.tag)
+    storage.tasks.insert(0, task)
+    return task
+
 @command
 @command.alias("new")
 def new_task(*args, storage, viewer):
     title = 'No name'
-    today = dt.datetime.now()
-    start = today
-    end = today
     match args:
         case []:
             while (title := input('Title: ')) != '':
-                storage.tasks.insert(0, Task(start=start, end=end, title=title))
+                create_task(title, storage)
         case _:
             title = ' '.join(args)
-            storage.tasks.insert(0, Task(start=start, end=end, title=title))
+            create_task(title, storage)
 
 
 
@@ -195,3 +200,40 @@ def help(*args, storage, viewer):
             print(CommandManager.commands[command].__doc__)
         case command:
             print(f"Command {command} not found.")
+
+@command
+def set(*args, storage, viewer):
+    match args:
+        case key, value:
+            if hasattr(ContextManager, key):
+                setattr(ContextManager, key, value)
+                print(f"Set {key} to {value}")
+            else:
+                print(f"{key} not found")
+        case _:
+            print("Usage: set <key> <value>")
+
+@command
+def unset(*args, storage, viewer):
+    match args:
+        case key,:
+            if hasattr(ContextManager, key):
+                setattr(ContextManager, key, None)
+                print(f"Unset {key}")
+            else:
+                print(f"{key} not found")
+        case _:
+            print("Usage: unset <key>")
+
+@command
+def env(*args, storage, viewer):
+    match args:
+        case []:
+            print("Available environment variables:")
+            for key in ContextManager.__dict__:
+                if not key.startswith('__'):
+                    print(f"  {key}")
+        case key, if hasattr(ContextManager, key):
+            print(f"{key}: {getattr(ContextManager, key)}")
+        case key:
+            print(f"{key} not found")

@@ -149,6 +149,13 @@ class TaskViewAware:
     viewer = TaskViewer(TaskStorageAware.storage)
 
 
+class ContextManager:
+    """
+    Contains environment variables for commands.
+    """
+    filter = None
+    tag = None
+
 class CommandManager(TaskStorageAware, TaskViewAware):
     commands: Dict[str, Callable] = dict()
     aliases: Dict[str, str] = dict()
