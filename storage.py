@@ -1,5 +1,20 @@
 import pydantic
 import datetime as dt
+from config import DATE_FORMAT
+
+def lom(date):
+    # last date of month
+    date = date.replace(day=1)
+    date = date.replace(month=date.month+1)
+    date = date - dt.timedelta(days=1)
+    return date.day
+
+def date_range(start: dt.datetime,  stop: dt.datetime, step: dt.timedelta=dt.timedelta(days=1)):
+    cur = start
+    while cur.date() <= stop.date():
+        yield cur
+        cur += step
+
 
 class Task(pydantic.BaseModel):
     start: dt.datetime
@@ -32,3 +47,20 @@ def random_task(title="Random Task"):
 
 class TaskStorage(pydantic.BaseModel):
     tasks: list[Task]
+
+
+class TaskStorageAware:
+    with open('tasks.json', 'r') as f:
+        storage = TaskStorage.model_validate_json(f.read())
+
+
+def save_storage(storage: TaskStorage):
+    with open('tasks.json', 'w') as f:
+        f.write(storage.model_dump_json())
+        print('Saved')
+
+
+def backup_storage(storage: TaskStorage):
+    with open('tasks.json.bak', 'w') as f:
+        f.write(storage.model_dump_json())
+        print('Backed up')

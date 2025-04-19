@@ -8,7 +8,6 @@ from loguru import logger
 from storage import Task, TaskStorage
 
 
-DATE_FORMAT = "%d.%m.%y"
 digits = {
     '0':'🯰',
     '1':'🯱',
@@ -27,31 +26,7 @@ class ShellException(Exception):
     pass
 
 
-def lom(date):
-    # last date of month
-    date = date.replace(day=1)
-    date = date.replace(month=date.month+1)
-    date = date - dt.timedelta(days=1)
-    return date.day
 
-def date_range(start: dt.datetime,  stop: dt.datetime, step: dt.timedelta=dt.timedelta(days=1)):
-    cur = start
-    while cur.date() <= stop.date():
-        yield cur
-        cur += step
-
-
-
-
-def save_storage(storage: TaskStorage):
-    with open('tasks.json', 'w') as f:
-        f.write(storage.model_dump_json())
-        print('Saved')
-
-def backup_storage(storage: TaskStorage):
-    with open('tasks.json.bak', 'w') as f:
-        f.write(storage.model_dump_json())
-        print('Backed up')
 
 
 def display_timeline(lshift=0, start_date: dt.datetime | None =None, end_date: dt.datetime | None =None):
@@ -112,9 +87,6 @@ class TaskViewer:
         print(colorama.Fore.RESET, end="")
 
 
-class TaskStorageAware:
-    with open('tasks.json', 'r') as f:
-        storage = TaskStorage.model_validate_json(f.read())
 
 
 class TaskViewAware:
