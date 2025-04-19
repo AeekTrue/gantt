@@ -1,3 +1,6 @@
+dev-history
+dev-rc
+
 # Python-generated files
 __pycache__/
 *.py[oc]
