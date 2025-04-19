@@ -1,5 +1,6 @@
 import pydantic
 import datetime as dt
+from loguru import logger
 from config import DATE_FORMAT
 
 def lom(date):
@@ -48,19 +49,18 @@ def random_task(title="Random Task"):
 class TaskStorage(pydantic.BaseModel):
     tasks: list[Task]
 
+    def save_storage(self):
+        with open('tasks.json', 'w') as f:
+            f.write(self.model_dump_json())
+            logger.info('Saved')
+
+
+    def backup_storage(self):
+        with open('tasks.json.bak', 'w') as f:
+            f.write(self.model_dump_json())
+            print('Backed up')
+
 
 class TaskStorageAware:
     with open('tasks.json', 'r') as f:
         storage = TaskStorage.model_validate_json(f.read())
-
-
-def save_storage(storage: TaskStorage):
-    with open('tasks.json', 'w') as f:
-        f.write(storage.model_dump_json())
-        print('Saved')
-
-
-def backup_storage(storage: TaskStorage):
-    with open('tasks.json.bak', 'w') as f:
-        f.write(storage.model_dump_json())
-        print('Backed up')
