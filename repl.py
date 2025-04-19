@@ -2,26 +2,28 @@ import os
 import code
 from types import ModuleType
 from typing import Optional, Dict, List
-from gantt import parser, CommandManager
-import commands
 
 os.environ['LOGURU_AUTOINIT'] = 'False'
 os.environ['LOGURU_LEVEL'] = 'TRACE'
 from loguru import logger
-
 logger.add('logs')
+
+
+from gantt import parser, CommandManager
+import commands
+
 
 readline: Optional[ModuleType]
 try:
     import readline
 except ImportError:
+    logger.warning('Can not import "readline". History and autocomplete may not work.')
     readline = None
 
 
 class Repl(code.InteractiveConsole):
     def runsource(self, source, filename="<input>", symbol="single"):
         # TODO: Integrate your compiler/interpreter
-        logger.trace(f"parse {source}, {symbol=}")
         parser(source)
         return False
 

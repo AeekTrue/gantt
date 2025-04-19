@@ -1,8 +1,9 @@
-from typing import Dict, List, Any, Callable
 import datetime as dt
 import colorama
 import pydantic
 import json
+from typing import Dict, List, Any, Callable
+from loguru import logger
 
 from storage import Task, TaskStorage
 
@@ -154,6 +155,7 @@ def tokentize(cmd: str):
     return cmd.split(' ')
 
 def parser(cmd:str):
+    logger.trace(f"parse {cmd}")
     command, *args = tokentize(cmd)
     if command in CommandManager.aliases:
         alias = CommandManager.aliases[command]
