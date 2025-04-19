@@ -53,7 +53,7 @@ def backup_storage(storage: TaskStorage):
         print('Backed up')
 
 
-def display_timeline(lshift=0, start_date: dt.datetime | None =None, end_date: dt.datetime | None = None):
+def display_timeline(lshift=0, start_date: dt.datetime | None =None, end_date: dt.datetime | None =None):
     today = dt.datetime.now()
     if start_date is None:
         start_date = today.replace(day=1)
