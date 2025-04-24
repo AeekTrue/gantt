@@ -7,7 +7,9 @@ from types import ModuleType
 from typing import Optional
 from loguru import logger
 
-from storage import TaskStorageAware
+from cli import cli
+import cmd # load commands to cli
+
 
 readline: Optional[ModuleType]
 try:
@@ -37,19 +39,13 @@ def parse_command(command_str):
         return []
 
 
-class Namespace:
-    def __getitem__(self, key: str):
-        return len(key)
-
-
-ns = Namespace()
-class Repl(TaskStorageAware, code.InteractiveConsole):
+class Repl(code.InteractiveConsole):
     def runsource(self, source, filename='<console>', symbol='single'):
         try:
             parsed_command = parse_command(source)
             if parsed_command == []:
                 return False
             command, *args = parsed_command
-            logger.debug(f"Command: {command}, Args: {args}")
+            cli.execute_command(command, args)
         except Exception as e:
             print(f"Error: {e}")
