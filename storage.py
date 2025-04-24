@@ -10,9 +10,9 @@ def lom(date):
     date = date - dt.timedelta(days=1)
     return date.day
 
-def date_range(start: dt.datetime,  stop: dt.datetime, step: dt.timedelta=dt.timedelta(days=1)):
+def date_range(start: dt.date,  stop: dt.date, step: dt.timedelta=dt.timedelta(days=1)):
     cur = start
-    while cur.date() <= stop.date():
+    while cur <= stop:
         yield cur
         cur += step
 
