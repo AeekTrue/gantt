@@ -2,10 +2,10 @@
 import os
 os.environ['LOGURU_AUTOINIT'] = 'False'
 os.environ['LOGURU_LEVEL'] = 'TRACE'
-
 from loguru import logger
-from repl import Repl
 
+from repl import Repl
+from config import GREETING
 
 def main():
     app_dir = os.path.dirname(os.path.realpath(__file__))
@@ -16,7 +16,7 @@ def main():
     logger.add(log_file)
     logger.info(f"Log file: {log_file}")
     repl = Repl()
-    repl.interact()
+    repl.interact(banner=GREETING)
 
 if __name__ == "__main__":
     main()
