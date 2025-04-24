@@ -1,4 +1,4 @@
-from cli import cli
+from cli import cli, display_tasks
 from storage import TaskStorage
 
 
@@ -10,5 +10,4 @@ def ls(storage: TaskStorage, *args):
     '''
     default_filter = 'not task.done'
     filter = ' '.join(args) or default_filter
-    result = '\n'.join(str(task) for task in storage.tasks if eval(filter, {'task': task}))
-    print(result)
+    display_tasks(storage.tasks, lambda task: eval(filter, {'task': task}))
